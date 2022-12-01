@@ -39,4 +39,20 @@ jobs:
           port: 3022
           pass: 1055
           run: |
-            ./dockerrun.sh
+            echo docker creaet port:18011 name:kikiworkflow 으로 작업합니다...
+            echo
+            echo 1/5 docker login 
+            echo ...이미설정되있는걸로 알고 pass
+            wait
+            echo 2/5 docker pull
+            docker pull kikidockerhub/kikiworkflow
+            wait
+            echo 3/5 이전 버젼 삭제후 docker run
+            docker rm -f kikiworkflow
+            wait
+            docker run --name kikiworkflow -p 18011:80 -d kikidockerhub/kikiworkflow
+            wait
+            echo 4/5 docker image prune
+            docker image prune -f
+            wait
+            echo 5/5 finished.  see at http://kikibus.iptime.org:18011
