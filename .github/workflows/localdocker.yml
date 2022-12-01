@@ -47,9 +47,9 @@ jobs:
             echo 3/5 이전 버젼 삭제후 docker run
             docker rm -f kikiworkreact
             wait
-            docker run --name kikiworkreact -p 18011:80 -d kikidockerhub/kikiworkreact
+            docker run --name kikiworkreact -p 18087:80 -d kikidockerhub/kikiworkreact
             wait
             echo 4/5 docker image prune
             docker image prune -f
             wait
-            echo 5/5 finished.  see at http://kikibus.iptime.org:18011
+            echo 5/5 finished.  see at http://kikibus.iptime.org:18087
