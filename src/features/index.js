@@ -34,4 +34,6 @@ export default counterSlice.reducer;
 const globalVar = {
   openDialog: false,
   openPopup: false,
+  dispatchData: [],
+  userId: null,
 };

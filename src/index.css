@@ -11,3 +11,10 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.eee {
+  background: #eee;
+}
+.ddd {
+  background: rgb(180, 222, 178);
+}

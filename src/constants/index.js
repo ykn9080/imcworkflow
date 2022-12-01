@@ -6,6 +6,8 @@
 export const API2 =
   process.env.REACT_APP_NODE_ENV === "production"
     ? "https://ormwork.kiki-bus.com/api"
+    : process.env.REACT_APP_NODE_ENV === "local"
+    ? "http://localhost:8011/api"
     : "http://kikibus.iptime.org:18011/api";
 console.log(process.env.REACT_APP_NODE_ENV);
 // export const API = "https://api.kiki-bus.com";

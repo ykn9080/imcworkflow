@@ -9,9 +9,7 @@ const About = () => {
       <div class="row flex-nowrap">
         <Sidebar />
         <Body>
-          <div style={{ width: 500, height: 100 }}>
-            <WorkTable />
-          </div>
+          <WorkTable />
         </Body>
       </div>
     </div>
