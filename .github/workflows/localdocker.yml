@@ -36,7 +36,7 @@ jobs:
           port: 3022
           pass: 1055
           run: |
-            echo docker creaet port:18011 name:kikiworkreact 로 작업합니다...
+            echo docker creaet port:18087 name:kikiworkreact 로 작업합니다...
             echo
             echo 1/5 docker login 
             echo ...이미설정되있는걸로 알고 pass
@@ -47,7 +47,7 @@ jobs:
             echo 3/5 이전 버젼 삭제후 docker run
             docker rm -f kikiworkreact
             wait
-            docker run --name kikiworkreact -p 18087:80 -d kikidockerhub/kikiworkreact
+            docker run --name kikiworkreact -p 18087:80 --network=kikinet -d kikidockerhub/kikiworkreact
             wait
             echo 4/5 docker image prune
             docker image prune -f

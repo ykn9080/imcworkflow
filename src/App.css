@@ -36,3 +36,65 @@
     transform: rotate(360deg);
   }
 }
+
+
+/* antd table css*/
+.ant-table-wrapper {
+
+  width: 100%;
+  /* margin-top: -15px !important; */
+
+}
+
+.ant-table-thead .ant-table-cell {
+  background-color: #e2e5ed !important;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.rowClassName1 {
+  border-color: black;
+  border-width: 3px;
+  border-style: solid;
+}
+
+.rowClassName1 td:first-child {
+  background-color: #e2e5ed;
+  border-left: transparent;
+}
+
+/* .ant-table table tr>td:nth-child(3) {
+  font-size: 20px;
+} */
+
+.ant-table table {
+  font-size: 14px;
+  font-weight: bold;
+
+  border: 2px solid black;
+}
+
+.ant-table tr>th {
+  border: 1px solid black !important;
+  border-top: 1px solid black;
+  text-align: center !important;
+}
+
+/* .ant-table tr> :last-child {
+  border-bottom: transparent;
+} */
+
+/* .ant-table th:first-child {
+  border-left: transparent;
+} */
+
+.ant-table td {
+  border: 1px solid black;
+  text-align: center;
+}
+
+
+/* ckeditor css */
+.ck-content .table {
+  width: auto;
+}

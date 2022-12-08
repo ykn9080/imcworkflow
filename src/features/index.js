@@ -35,5 +35,9 @@ const globalVar = {
   openDialog: false,
   openPopup: false,
   dispatchData: [],
+  onGoing: null,
   userId: null,
+  userList: null,
+  processTypeCount: null,
+  editorText: "",
 };
