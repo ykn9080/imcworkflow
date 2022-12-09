@@ -75,8 +75,9 @@ const Sidebar = () => {
               data-bs-parent="#menu"
             >
               {menuList1.map((item, index) => {
-                const count = cnt[item.title];
-                if (!(cnt && cnt[item.title])) item.badge = false;
+                console.log(item);
+                const count = cnt?.[item?.title];
+                if (!(cnt && cnt[item?.title])) item.badge = false;
                 return <ListItem item={item} count={count} />;
               })}
             </ul>
@@ -97,7 +98,7 @@ const Sidebar = () => {
               data-bs-parent="#menu"
             >
               {menuList2.map((item, index) => {
-                const count = cnt[item.title];
+                const count = cnt?.[item.title];
                 if (!(cnt && cnt[item.title])) item.badge = false;
                 return <ListItem item={item} count={count} />;
               })}

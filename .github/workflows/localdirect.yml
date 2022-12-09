@@ -1,0 +1,60 @@
+name: Local Server Docker build
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [created]
+  workflow_dispatch: # Put here!!
+
+# Env variable
+env:
+  DOCKER_USER: kikidockerhub
+  DOCKER_PASSWORD: kiki12345
+  REPO_NAME: kikiworkreact
+jobs:
+  push-image-to-docker-hub: # job name
+    runs-on: ubuntu-latest # runner name : (ubuntu latest version)
+    steps:
+      # - uses: actions/checkout@v2 # first action : checkout source code
+      # - name: docker login
+      #   run: | # log into docker hub account
+      #     docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+      # - name: Get current date # get the date of the build
+      #   id: date
+      #   run: echo "::set-output name=date::$(date +'%Y-%m-%d--%M-%S')"
+      # - name: Build the Docker image # push The image to the docker hub
+      #   run: docker build . --file Dockerfile.development --tag $DOCKER_USER/$REPO_NAME:latest
+      # - name: Docker Push
+      #   run: docker push $DOCKER_USER/$REPO_NAME:latest
+      - name: Run sshpass commands
+        uses: matheusvanzan/sshpass-action@v2
+        with:
+          host: kikibus.iptime.org
+          user: kikiuser
+          port: 3022
+          pass: 1055
+          run: |
+            echo docker creaet  name:kikiworkreact 로 작업합니다...
+            echo
+            echo 1/7 change directory to kikiworkreact
+            cd /mnt/d/kiki/kikiworkreact
+            echo 2/7 git pull
+            git pull
+            wait
+            echo 3/7 npm install just in case
+            npm install
+            wait
+            echo 4/7 docker build
+            docker build -t kikidockerhub/kikiworkreact .
+            wait
+            echo 5/7 이전 버젼 삭제후 docker run
+            docker rm -f kikiworkreact
+            wait
+            docker run --name kikiworkreact -p 18087:80 --network=kikinet -d kikidockerhub/kikiworkreact
+            wait
+            echo 6/7 docker image prune
+            docker image prune -f
+            wait
+            echo 7/7 finished.  see at http://workreact.kikii.click or http://kikibus.iptime.org:18087
