@@ -18,6 +18,7 @@ const Form = () => {
   const { processId } = useParams();
   const [formData, setFormData] = useState();
   const [modal, setModal] = useState();
+  const [formId, setFormId] = useState();
   const userId = useSelector((state) => state.global.userId);
   const editorText = useSelector((state) => state.global.editorText);
 
@@ -73,7 +74,53 @@ const Form = () => {
     }
   };
   const saveDocumentHandler = () => {
+    console.log(processId);
     console.log(formData);
+    const curdate = new Date();
+    // find taskId from processId;
+    // processId===-1이면 신규, 아니면 수정
+    if (processId === -1) {
+      //post new task
+      const datatsk = {
+        name: formData.title,
+        descript: formData.descript,
+        creatorId: userId,
+        createDate: curdate,
+        status: "notstarted",
+        dueDate: formData.dueDate,
+      };
+      const urltsk = `${API2}/task`;
+      const rtntsk = getData(urltsk, "post", datatsk);
+      //return task_id
+      const taskId = rtntsk.object.id;
+      //poset new form
+      const dataform = {
+        formType: formData.formtype,
+        title: formData.formtitle,
+        html: formData.html,
+        taskId: taskId,
+        created: curdate,
+      };
+
+      const urlform = `${API2}/form`;
+      const rtnform = getData(urlform, "post", dataform);
+      setFormId(rtnform.object.id);
+    } else {
+    }
+
+    const data = {
+      processId: processId,
+      title: formData.title,
+      descript: formData.descript,
+      html: formData.html,
+    };
+    const rtn = getData(url, "post", data);
+    if (rtn) {
+      console.log(rtn);
+      message.info("저장되었습니다. ");
+      dispatchEvent(globalVariable({ onGoing: null }));
+      navigate(`/ongoing`, { replace: true });
+    }
   };
   const onFormChange = (e, label) => {
     const newform = { ...formData, [label]: e.target.value };
@@ -134,8 +181,8 @@ const Form = () => {
         <div class="col-sm-10 text-start">
           <input
             type="button"
-            class="btn btn-primary"
-            value="편집"
+            class="btn btn-dark btn-sm"
+            value="결재선 편집"
             id="process"
             onClick={() => {
               $("#btnModal").click();
@@ -206,7 +253,7 @@ const Form = () => {
             <div class="d-flex justify-content-center mt-3">
               <button
                 type="button"
-                class="btn btn-light   "
+                class="btn btn-light"
                 onClick={() =>
                   navigate(`/form/${processId}`, { replace: true })
                 }

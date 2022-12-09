@@ -2,16 +2,33 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-
+import { menuList1, menuList2 } from "../../assets/json/index";
 const Sidebar = () => {
   const navigate = useNavigate();
   const cnt = useSelector((state) => state.global.processTypeCount);
 
-  useEffect(() => {
-    console.log(cnt);
-  }, [cnt]);
+  const ListItem = ({ count, item }) => {
+    return (
+      <li>
+        <a href="#" class="nav-link px-0">
+          <span class="d-none d-sm-inline">
+            <Link to={item.path}>{item.title}</Link>
+            {item.badge && (
+              <span
+                class="badge bg-danger rounded-circle ms-1"
+                style={{ fontSize: ".55rem" }}
+              >
+                {count}
+              </span>
+            )}
+          </span>
+        </a>
+      </li>
+    );
+  };
+
   return (
-    <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
+    <div class="col-auto col-md-2 col-xl-2 px-sm-2 px-0 bg-dark">
       <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100 w-100">
         <a
           href="/"
@@ -19,13 +36,10 @@ const Sidebar = () => {
         >
           <span class="fs-5 d-none d-sm-inline">Menu</span>
         </a>
-        <ul
-          class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-left align-items-sm-start w-auto"
-          id="menu"
-        >
+        <ul class="nav  text-start" style={{ width: "100px" }} id="menu">
           <li class="nav-item">
-            <a href="#" class="nav-link align-middle px-0">
-              <i class="fs-4 bi-house"></i>{" "}
+            <a href="#" class="nav-link px-0">
+              <i class="fs-4 bi-house"></i>
               <span class="ms-1 d-none d-sm-inline">
                 <Link to="/">Home</Link>
               </span>
@@ -33,14 +47,14 @@ const Sidebar = () => {
           </li>
           <li class="nav-item">
             <a href="#" class="nav-link align-middle px-0">
-              <i class="fs-4 bi-house"></i>{" "}
+              <i class="fs-4 bi-house"></i>
               <span class="ms-1 d-none d-sm-inline d-grid">
                 <button
                   type="button"
                   class="btn btn-light w-auto"
                   onClick={() => navigate(`/form/edit/-1`, { replace: true })}
                 >
-                  기안
+                  기안 작성
                 </button>
               </span>
             </a>
@@ -53,83 +67,18 @@ const Sidebar = () => {
               class="nav-link px-0 "
             >
               <i class="fs-4 bi-speedometer2"></i>
-              <span class="ms-1 d-none d-sm-inline">결재</span>
+              <span class=" d-none d-sm-inline">결재</span>
             </a>
             <ul
-              class="collapse show nav flex-column"
+              class="collapse show nav flex-column ms-4"
               id="submenu1"
               data-bs-parent="#menu"
             >
-              <li class="w-100">
-                <a href="#" class="nav-link px-0">
-                  <span class="d-none d-sm-inline">
-                    <Link to="/ongoing">전체</Link>
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="nav-link px-0">
-                  <span class="d-none d-sm-inline">
-                    <Link to={`/ongoing/결재`}>
-                      대기{" "}
-                      {cnt && cnt["결재"] && (
-                        <span class="badge bg-danger rounded-circle ">
-                          {cnt["결재"]}
-                        </span>
-                      )}
-                    </Link>
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="nav-link px-0">
-                  <span class="d-none d-sm-inline">
-                    <Link to={`/ongoing/진행`}>
-                      진행
-                      {cnt && cnt["진행"] && (
-                        <span class="badge bg-danger rounded-circle ">
-                          {cnt["진행"]}
-                        </span>
-                      )}
-                    </Link>
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="nav-link px-0">
-                  <span class="d-none d-sm-inline">
-                    <Link to={`/ongoing/반려`}>
-                      반려{" "}
-                      {cnt && cnt["반려"] && (
-                        <span class="badge bg-danger rounded-circle ">
-                          {cnt["반려"]}
-                        </span>
-                      )}
-                    </Link>
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="nav-link px-0">
-                  <span class="d-none d-sm-inline">
-                    <Link to={`/ongoing/완료`}>
-                      완료{" "}
-                      {cnt && cnt["완료"] && (
-                        <span class="badge bg-danger rounded-circle ">
-                          {cnt["완료"]}
-                        </span>
-                      )}
-                    </Link>
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="nav-link px-0">
-                  <span class="d-none d-sm-inline">
-                    <Link to={`/ongoing/5`}>참조</Link>
-                  </span>
-                </a>
-              </li>
+              {menuList1.map((item, index) => {
+                const count = cnt[item.title];
+                if (!(cnt && cnt[item.title])) item.badge = false;
+                return <ListItem item={item} count={count} />;
+              })}
             </ul>
           </li>
 
@@ -140,41 +89,18 @@ const Sidebar = () => {
               class="nav-link px-0 align-middle"
             >
               <i class="fs-4 bi-speedometer2"></i>
-              <span class="ms-1 d-none d-sm-inline">보관함</span>
+              <span class="d-none d-sm-inline">보관함</span>
             </a>
             <ul
-              class="collapse show nav flex-column"
+              class="collapse show nav flex-column ms-4"
               id="submenu2"
               data-bs-parent="#menu"
             >
-              <li class="w-100">
-                <a href="#" class="nav-link px-0">
-                  <span class="d-none d-sm-inline">
-                    <Link to={`/ongoing/기안`}>
-                      기안
-                      {cnt && cnt["기안"] && (
-                        <span class="badge bg-danger rounded-circle ">
-                          {cnt["기안"]}
-                        </span>
-                      )}
-                    </Link>
-                  </span>
-                </a>
-              </li>
-              <li>
-                <a href="#" class="nav-link px-0">
-                  <span class="d-none d-sm-inline">
-                    <Link to={`/ongoing/결재요청`}>
-                      요청
-                      {cnt && cnt["결재요청"] && (
-                        <span class="badge bg-danger rounded-circle ">
-                          {cnt["결재요청"]}
-                        </span>
-                      )}
-                    </Link>
-                  </span>
-                </a>
-              </li>
+              {menuList2.map((item, index) => {
+                const count = cnt[item.title];
+                if (!(cnt && cnt[item.title])) item.badge = false;
+                return <ListItem item={item} count={count} />;
+              })}
             </ul>
           </li>
 
@@ -185,10 +111,10 @@ const Sidebar = () => {
               class="nav-link px-0 align-middle"
             >
               <i class="fs-4 bi-speedometer2"></i>
-              <span class="ms-1 d-none d-sm-inline">설정</span>
+              <span class="d-none d-sm-inline">설정</span>
             </a>
             <ul
-              class="collapse show nav flex-column"
+              class="collapse show nav flex-column ms-4"
               id="submenu21"
               data-bs-parent="#menu"
             >
