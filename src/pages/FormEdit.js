@@ -107,20 +107,6 @@ const Form = () => {
       setFormId(rtnform.object.id);
     } else {
     }
-
-    const data = {
-      processId: processId,
-      title: formData.title,
-      descript: formData.descript,
-      html: formData.html,
-    };
-    const rtn = getData(url, "post", data);
-    if (rtn) {
-      console.log(rtn);
-      message.info("저장되었습니다. ");
-      dispatchEvent(globalVariable({ onGoing: null }));
-      navigate(`/ongoing`, { replace: true });
-    }
   };
   const onFormChange = (e, label) => {
     const newform = { ...formData, [label]: e.target.value };
