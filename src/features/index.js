@@ -35,9 +35,10 @@ const globalVar = {
   openDialog: false,
   openPopup: false,
   dispatchData: [],
-  onGoing: null,
+  onGoing: null, //ongoing task list
+  imsiForm: null, //임시저장된 form
   userId: null,
   userList: null,
-  processTypeCount: null,
+  processTypeCount: null, //process type별 갯수
   editorText: "",
 };

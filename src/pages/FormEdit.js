@@ -12,13 +12,14 @@ import { message } from "antd";
 import CkEditor from "components/editor/ckEditor";
 import { BootModal } from "components/modal/BootModal";
 import ProcessEditor from "components/process/ProcessEditor";
+import { findTaskId } from "components/dataget/findTaskId";
 
 const Form = () => {
   const navigate = useNavigate();
   const { processId } = useParams();
   const [formData, setFormData] = useState();
-  const [modal, setModal] = useState();
   const [formId, setFormId] = useState();
+  const [modal, setModal] = useState();
   const userId = useSelector((state) => state.global.userId);
   const editorText = useSelector((state) => state.global.editorText);
 
@@ -27,10 +28,16 @@ const Form = () => {
     const url2 = `${API2}/findFormbyProcessId/${processId}`;
     let rtn = await getData(url2, "get");
     console.log(processId, rtn);
-    if (rtn && rtn.data) setFormData(rtn.data[0]);
+    if (rtn && rtn.data && rtn.data[0]) {
+      setFormData(rtn.data[0]);
+      setFormId(rtn.data[0].id);
+    }
   }
   useEffect(() => {
-    if (processId) fetchForm();
+    if (processId && processId !== "-1") {
+      console.log(processId.toString());
+      fetchForm();
+    }
     const modal = {
       id: "processBuilder",
       title: "결재선 선택",
@@ -73,39 +80,47 @@ const Form = () => {
       navigate(`/ongoing`, { replace: true });
     }
   };
-  const saveDocumentHandler = () => {
+  const saveDocumentHandler = async () => {
     console.log(processId);
     console.log(formData);
     const curdate = new Date();
     // find taskId from processId;
     // processId===-1이면 신규, 아니면 수정
-    if (processId === -1) {
-      //post new task
-      const datatsk = {
-        name: formData.title,
-        descript: formData.descript,
-        creatorId: userId,
-        createDate: curdate,
-        status: "notstarted",
-        dueDate: formData.dueDate,
-      };
-      const urltsk = `${API2}/task`;
-      const rtntsk = getData(urltsk, "post", datatsk);
-      //return task_id
-      const taskId = rtntsk.object.id;
-      //poset new form
-      const dataform = {
-        formType: formData.formtype,
-        title: formData.formtitle,
-        html: formData.html,
-        taskId: taskId,
-        created: curdate,
-      };
+    const urltsk = `${API2}/task`;
+    const urlform = `${API2}/form`;
+    let datatsk = {
+      name: formData.title,
+      descript: formData.descript,
+      dueDate: formData.duedate,
+    };
+    let dataform = {
+      formType: formData.formtype,
+      title: formData.formtitle,
+      html: formData.html,
+    };
 
-      const urlform = `${API2}/form`;
-      const rtnform = getData(urlform, "post", dataform);
-      setFormId(rtnform.object.id);
+    if (!formId) {
+      //post new task
+      datatsk.creatorId = userId;
+      datatsk.createDate = curdate;
+      datatsk.status = "notstarted";
+
+      const rtntsk = await getData(urltsk, "post", datatsk);
+      console.log(rtntsk);
+      //poset new form
+      dataform.taskId = rtntsk.id;
+      dataform.created = curdate;
+      const rtnform = await getData(urlform, "post", dataform);
+      console.log(urlform);
+      setFormId(rtnform.id);
     } else {
+      console.log("else");
+      // processId가 있으면 수정
+      const taskId = await findTaskId(formId, "form");
+      console.log(formId, taskId, urltsk);
+      getData(`${urltsk}/${taskId}`, "put", datatsk);
+      //formId가 있으면 수정
+      getData(`${urlform}/${formId}`, "put", dataform);
     }
   };
   const onFormChange = (e, label) => {

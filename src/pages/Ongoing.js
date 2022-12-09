@@ -17,8 +17,6 @@ import {
 } from "../components/dataget/fetchData";
 import { API2 } from "constants";
 import { Table, message } from "antd";
-import { TfiCheck } from "react-icons/tfi";
-import { BootModal } from "components/modal/BootModal";
 
 const Ongoing = (props) => {
   let navigate = useNavigate();

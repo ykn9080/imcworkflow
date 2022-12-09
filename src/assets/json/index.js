@@ -17,7 +17,7 @@ export const menuList2 = [
   {
     title: "임시",
     name: "임시",
-    path: "/ongoing/임시",
+    path: "/form/list",
     badge: 0,
   },
 ];

@@ -4,6 +4,7 @@ import Ongoing from "./pages/Ongoing";
 import Setting from "./pages/Setting";
 import Form from "./pages/Form";
 import FormEdit from "./pages/FormEdit";
+import FormList from "./pages/FormList";
 import Process from "./pages/Process";
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
@@ -18,6 +19,7 @@ function App() {
         <Route path="completed" element={<Completed />} />
         <Route path="setting/:id" element={<Setting />} />
         <Route path="form/edit/:processId" element={<FormEdit />} />
+        <Route path="form/list" element={<FormList />} />
         <Route exact path="form/:processId" element={<Form />} />
         <Route exact path="process/:processId" element={<Process />} />
         <Route path="/" element={<HomePage />} />

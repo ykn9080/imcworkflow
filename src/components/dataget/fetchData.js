@@ -34,9 +34,11 @@ export const getData = async (url, method, params) => {
  * @returns
  */
 export const makeColumn = (data1, opt) => {
+  if (!data1) return;
   const data = _.cloneDeep(data1);
 
   let fields;
+  if (!data[0]) return;
   return Object.keys(data[0]).map((k, i) => {
     fields = null;
 
