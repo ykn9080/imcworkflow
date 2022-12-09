@@ -13,7 +13,7 @@ const Sidebar = () => {
         <a href="#" class="nav-link px-0">
           <span class="d-none d-sm-inline">
             <Link to={item.path}>{item.title}</Link>
-            {item.badge && (
+            {item.badge === 1 && (
               <span
                 class="badge bg-danger rounded-circle ms-1"
                 style={{ fontSize: ".55rem" }}
@@ -26,7 +26,7 @@ const Sidebar = () => {
       </li>
     );
   };
-
+  console.log(menuList1);
   return (
     <div class="col-auto col-md-2 col-xl-2 px-sm-2 px-0 bg-dark">
       <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100 w-100">
@@ -75,9 +75,8 @@ const Sidebar = () => {
               data-bs-parent="#menu"
             >
               {menuList1.map((item, index) => {
-                console.log(item);
-                const count = cnt?.[item?.title];
-                if (!(cnt && cnt[item?.title])) item.badge = false;
+                const count = cnt?.[item.title];
+                if (!(cnt && cnt[item.title])) item.badge = 0;
                 return <ListItem item={item} count={count} />;
               })}
             </ul>
@@ -99,7 +98,7 @@ const Sidebar = () => {
             >
               {menuList2.map((item, index) => {
                 const count = cnt?.[item.title];
-                if (!(cnt && cnt[item.title])) item.badge = false;
+                if (!(cnt && cnt[item.title])) item.badge = 0;
                 return <ListItem item={item} count={count} />;
               })}
             </ul>
