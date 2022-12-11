@@ -3,9 +3,9 @@ import Sidebar from "../components/layout/Sidebar";
 import Body from "../components/layout/Body";
 import Header from "../components/layout/Header";
 
-const Setting = () => {
+const ProcessList = () => {
   const PageHeader = () => {
-    return <Header title="환경설정" />;
+    return <Header title="결재선리스트" />;
   };
   return (
     <div class="container-fluid">
@@ -13,10 +13,15 @@ const Setting = () => {
         <Sidebar />
         <Body>
           <PageHeader />
+          {/* <Table
+            dataSource={tbdata}
+            columns={tbcolumn}
+            rowClassName={(record) => (record.id === selected ? "ddd" : "")}
+          /> */}
         </Body>
       </div>
     </div>
   );
 };
 
-export default Setting;
+export default ProcessList;

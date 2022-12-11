@@ -29,3 +29,6 @@ code {
   --bs-btn-padding-x: .5rem;
   --bs-btn-font-size: .75rem;
 }
+.ck-editor__editable_inline {
+  min-height: 300px;
+}

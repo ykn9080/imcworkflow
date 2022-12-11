@@ -1,43 +1,58 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import globalVariable from "actions";
 import Sidebar from "../components/layout/Sidebar";
 import Body from "../components/layout/Body";
 import Header from "../components/layout/Header";
 import $ from "jquery";
-import { useHistory, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { API2 } from "constants";
 import { getData } from "../components/dataget/fetchData";
 import { message } from "antd";
 import CkEditor from "components/editor/ckEditor";
 import { BootModal } from "components/modal/BootModal";
 import ProcessEditor from "components/process/ProcessEditor";
-import { findTaskId } from "components/dataget/findTaskId";
+import { findTaskId } from "components/dataget/findId";
+import moment from "moment";
 
 const Form = () => {
   const navigate = useNavigate();
-  const { processId } = useParams();
+  const dispatch = useDispatch();
+  const { formId } = useParams();
+
   const [formData, setFormData] = useState();
-  const [formId, setFormId] = useState();
+  const [formid, setFormid] = useState();
+
   const [modal, setModal] = useState();
   const userId = useSelector((state) => state.global.userId);
-  const editorText = useSelector((state) => state.global.editorText);
+  //const editorText = useSelector((state) => state.global.editorText);
 
-  const data = "lorem <b>ipsum</b>";
-  async function fetchForm() {
-    const url2 = `${API2}/findFormbyProcessId/${processId}`;
+  async function fetchForm(id) {
+    const url2 = `${API2}/formwithtask/${id}`;
     let rtn = await getData(url2, "get");
-    console.log(processId, rtn);
+    console.log(id, rtn);
     if (rtn && rtn.data && rtn.data[0]) {
       setFormData(rtn.data[0]);
-      setFormId(rtn.data[0].id);
+      dispatch(globalVariable({ editorText: rtn.data[0].html }));
     }
   }
   useEffect(() => {
-    if (processId && processId !== "-1") {
-      console.log(processId.toString());
-      fetchForm();
+    if (formId !== "new") {
+      console.log(formId.toString());
+      fetchForm(formId);
+    } else {
+      setFormData({
+        taskName: "",
+        descript: "",
+        dueDate: "",
+        formType: "",
+        formTitle: "",
+        html: "",
+      });
+      dispatch(globalVariable({ editorText: "" }));
+      console.log("nodata");
     }
+
     const modal = {
       id: "processBuilder",
       title: "결재선 선택",
@@ -45,12 +60,11 @@ const Form = () => {
       evt: saveProcessHandler,
       opt: { dialogClass: "modal-dialog modal-fullscreen" },
     };
+    setFormid(formId);
     setModal(modal);
-  }, []);
-  useEffect(() => {
-    const newform = { ...formData, html: editorText };
-    setFormData(newform);
-  }, [editorText]);
+  }, [formId]);
+
+  useEffect(() => {}, []);
   const submitHandler = () => {
     // form에 수정사항 저장
     const data = {};
@@ -63,25 +77,19 @@ const Form = () => {
   const saveProcessHandler = () => {
     console.log("saveProcess");
   };
-  const applyAction = () => {
-    console.log(processId, "재기안", "");
-    const url = `${API2}/activityInsert`;
-    const data = {
-      processId: processId,
-      comment: "",
-      action: "재기안",
-      userId: userId,
-    };
-    const rtn = getData(url, "post", data);
+  const applyAction = async () => {
+    const taskId = await findTaskId(formid, "form");
+    const url = `${API2}/activityStart/${taskId}`;
+
+    const rtn = getData(url, "get");
     if (rtn) {
       console.log(rtn);
       message.info("상신되었습니다. ");
-      dispatchEvent(globalVariable({ onGoing: null }));
       navigate(`/ongoing`, { replace: true });
     }
   };
   const saveDocumentHandler = async () => {
-    console.log(processId);
+    const taskId = await findTaskId(formid, "form");
     console.log(formData);
     const curdate = new Date();
     // find taskId from processId;
@@ -89,17 +97,17 @@ const Form = () => {
     const urltsk = `${API2}/task`;
     const urlform = `${API2}/form`;
     let datatsk = {
-      name: formData.title,
+      name: formData.taskName,
       descript: formData.descript,
-      dueDate: formData.duedate,
+      dueDate: formData.dueDate,
     };
     let dataform = {
-      formType: formData.formtype,
-      title: formData.formtitle,
+      formType: formData.formType,
+      title: formData.formTitle,
       html: formData.html,
     };
 
-    if (!formId) {
+    if (!taskId) {
       //post new task
       datatsk.creatorId = userId;
       datatsk.createDate = curdate;
@@ -111,16 +119,14 @@ const Form = () => {
       dataform.taskId = rtntsk.id;
       dataform.created = curdate;
       const rtnform = await getData(urlform, "post", dataform);
-      console.log(urlform);
-      setFormId(rtnform.id);
     } else {
       console.log("else");
       // processId가 있으면 수정
-      const taskId = await findTaskId(formId, "form");
-      console.log(formId, taskId, urltsk);
+      const taskId = await findTaskId(formid, "form");
+      console.log(formid, taskId, urltsk);
       getData(`${urltsk}/${taskId}`, "put", datatsk);
       //formId가 있으면 수정
-      getData(`${urlform}/${formId}`, "put", dataform);
+      getData(`${urlform}/${formid}`, "put", dataform);
     }
   };
   const onFormChange = (e, label) => {
@@ -139,8 +145,9 @@ const Form = () => {
             type="text"
             class="form-control"
             id="title"
+            value={formData?.taskName}
             onChange={(e) => {
-              onFormChange(e, "title");
+              onFormChange(e, "taskName");
             }}
           />
         </div>
@@ -154,6 +161,7 @@ const Form = () => {
             style={{ height: 100 }}
             class="form-control"
             id="descript"
+            value={formData?.descript}
             onChange={(e) => {
               onFormChange(e, "descript");
             }}
@@ -169,8 +177,9 @@ const Form = () => {
             type="date"
             class="form-control"
             id="duedate"
+            value={formData?.dueDate}
             onChange={(e) => {
-              onFormChange(e, "duedate");
+              onFormChange(e, "dueDate");
             }}
           />
         </div>
@@ -199,9 +208,10 @@ const Form = () => {
           <input
             type="text"
             class="form-control"
+            value={formData?.formType}
             id="formtype"
             onChange={(e) => {
-              onFormChange(e, "formtype");
+              onFormChange(e, "formType");
             }}
           />
         </div>
@@ -215,8 +225,9 @@ const Form = () => {
             type="text"
             class="form-control"
             id="formtitle"
+            value={formData?.formTitle}
             onChange={(e) => {
-              onFormChange(e, "formtitle");
+              onFormChange(e, "formTitle");
             }}
           />
         </div>
@@ -247,17 +258,11 @@ const Form = () => {
             {formInput}
             <CkEditor />
 
-            <div
-              class="text-start"
-              dangerouslySetInnerHTML={{ __html: editorText }}
-            />
             <div class="d-flex justify-content-center mt-3">
               <button
                 type="button"
                 class="btn btn-light"
-                onClick={() =>
-                  navigate(`/form/${processId}`, { replace: true })
-                }
+                onClick={() => navigate(`/form/${formid}`, { replace: true })}
               >
                 미리보기
               </button>

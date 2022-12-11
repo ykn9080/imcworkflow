@@ -11,7 +11,7 @@ const CkEditor = () => {
     <div className="App">
       <CKEditor
         editor={ClassicEditor}
-        data="<p>Hello from CKEditor 5!</p>"
+        data={editorText}
         onReady={(editor) => {
           // You can store the "editor" and use when it is needed.
           console.log("Editor is ready to use!", editor);
@@ -20,7 +20,6 @@ const CkEditor = () => {
           const data = editor.getData();
 
           dispatch(globalVariable({ editorText: data }));
-          console.log({ event, editor, data });
         }}
         onBlur={(event, editor) => {
           console.log("Blur.", editor);

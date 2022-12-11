@@ -4,6 +4,7 @@ import axios from "axios";
 import { API2 } from "constants";
 import moment from "moment";
 import _ from "lodash";
+import { Link } from "react-router-dom";
 
 export const getData = async (url, method, params) => {
   // console.log(API2);
@@ -52,7 +53,19 @@ export const makeColumn = (data1, opt) => {
       dataIndex: k,
       width: 100,
     };
+    // if(fields.render)
+    // rtn.render = (_, record) => (
+
+    //     onClick={() => {
+    //       cellClick(record[fields.dataIndex]));
+    //     }
+
+    // );
+
     if (opt && opt.click) {
+      fields = _.find(opt.fields, (o) => {
+        return o.dataIndex === k;
+      });
       rtn.onCell = (record, rowIndex) => {
         if (opt && opt.click) {
           return {
@@ -67,6 +80,7 @@ export const makeColumn = (data1, opt) => {
     return rtn;
   });
 };
+
 export const hideColumn = (Cols, hideArr) => {
   return Cols.filter((col) => {
     return hideArr.indexOf(col.dataIndex) === -1;
@@ -95,7 +109,7 @@ export const convertRows = (Rows, convertArr) => {
  * 버튼이 여러개일 경우, array에 추가함
  * array: [{
  *  click: clickHandler,
- *  kfield:"id",
+ *  dataIndex:"id",
  *  opt:{
  *    title:"Act",
  *    btntitle:"Edit",
@@ -121,13 +135,12 @@ export const makeButton = (array) => {
       dataIndex: "",
       width: btnwidth,
       key: "action",
-      render: (_, record) => (
+      render: (text, record) => (
         <Button
           type={btntype}
           icon={k.opt?.icon}
           onClick={() => {
-            console.log(k.kfield, record[k.kfield]);
-            k.click(record[k.kfield]);
+            k.click(record);
           }}
         >
           {btntitle}
@@ -155,16 +168,28 @@ export const makeCheckbox = (array) => {
           class="form-check-input"
           type="radio"
           name="radioNoLabel"
-          id={k.kfield}
+          id={k.dataIndex}
           value=""
           onClick={() => {
-            k.click(record[k.kfield]);
+            k.click(record[k.dataIndex]);
           }}
           aria-label="..."
         />
       ),
     };
   });
+};
+/**
+ *
+ * @param {*} cols 이미 만들어진 column
+ * @param {*} array 추가할 버튼이나 체크박스 array, makeButton, makeCheckbox 참조
+ * @returns
+ */
+export const appendButton = (cols, array, type) => {
+  let btncolumns = makeButton(array);
+  if (type === "checkbox") btncolumns = makeCheckbox(array);
+  if (btncolumns) cols = cols.concat(btncolumns);
+  return cols;
 };
 /**
  * 결재진행 프로세스별 갯수 카운트

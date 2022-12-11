@@ -56,7 +56,7 @@ export const HomePage = () => {
     const btncolumns = makeCheckbox([
       {
         click: cellClickHandler,
-        kfield: "id",
+        dataIndex: "id",
         opt: { title: "선택", dataIndex: "select" },
       },
     ]);
@@ -92,7 +92,7 @@ export const HomePage = () => {
     // const btncolumns = makeCheckbox([
     //   {
     //     click: cellClickHandler,
-    //     kfield: "id",
+    //     dataIndex: "id",
     //     opt: { title: "선택", dataIndex: "select" },
     //   },
     // ]);
@@ -117,7 +117,7 @@ export const HomePage = () => {
       //  const btncolumns = makeCheckbox([
       //    {
       //      click: cellClickHandler,
-      //      kfield: "id",
+      //      dataIndex: "id",
       //      opt: { title: "선택", dataIndex: "select" },
       //    },
       //  ]);

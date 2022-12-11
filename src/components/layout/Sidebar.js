@@ -52,7 +52,7 @@ const Sidebar = () => {
                 <button
                   type="button"
                   class="btn btn-light w-auto"
-                  onClick={() => navigate(`/form/edit/-1`, { replace: true })}
+                  onClick={() => navigate(`/form/edit/new`, { replace: true })}
                 >
                   기안 작성
                 </button>
@@ -121,14 +121,21 @@ const Sidebar = () => {
               <li class="w-100">
                 <a href="#" class="nav-link px-0">
                   <span class="d-none d-sm-inline">
-                    <Link to="/about">조직</Link>
+                    <Link to="/organization">조직</Link>
                   </span>
                 </a>
               </li>
               <li>
                 <a href="#" class="nav-link px-0">
                   <span class="d-none d-sm-inline">
-                    <Link to="/contact">환경</Link>
+                    <Link to="/process/list">결재선</Link>
+                  </span>
+                </a>
+              </li>
+              <li>
+                <a href="#" class="nav-link px-0">
+                  <span class="d-none d-sm-inline">
+                    <Link to="/setting">환경</Link>
                   </span>
                 </a>
               </li>

@@ -4,7 +4,7 @@ import Body from "../components/layout/Body";
 import Header from "../components/layout/Header";
 import { useDispatch, useSelector } from "react-redux";
 import globalVariable from "actions";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import _ from "lodash";
 import $ from "jquery";
 import {
@@ -17,6 +17,7 @@ import {
 } from "../components/dataget/fetchData";
 import { API2 } from "constants";
 import { Table, message } from "antd";
+import { findFormByTaskId } from "components/dataget/findId";
 
 const Ongoing = (props) => {
   let navigate = useNavigate();
@@ -88,7 +89,7 @@ const Ongoing = (props) => {
         btncolumns = makeButton([
           {
             click: modalHandler,
-            kfield: "processId",
+            dataIndex: "processId",
             opt: { btnstyle: "primary", title: "처리", btntitle: "결재" },
           },
         ]);
@@ -97,7 +98,7 @@ const Ongoing = (props) => {
         btncolumns = makeButton([
           {
             click: formHandler,
-            kfield: "processId",
+            dataIndex: "processId",
             opt: { btnstyle: "primary", title: "처리", btntitle: "재기안" },
           },
         ]);
@@ -127,13 +128,14 @@ const Ongoing = (props) => {
       "processId",
       "processMethod",
       "comment",
+      "formId",
     ]);
     return mcol;
   };
   const rowMaker = (data) => {
     let dt = convertRows(data, [
-      { dataIndex: "actionDate", type: "date", format: "YYYY-mm-DD hh:mm" },
-      { dataIndex: "dueDate", type: "date", format: "YYYY-mm-DD hh:mm" },
+      { dataIndex: "actionDate", type: "date", format: "YYYY-MM-DD h:mm a" },
+      { dataIndex: "dueDate", type: "date", format: "YYYY-MM-DD h:mm a" },
     ]);
     return dt;
   };
@@ -142,15 +144,21 @@ const Ongoing = (props) => {
     let rtn = await getData(url2, "get");
     makeDataSet(rtn.data);
   }
-  const makeDataSet = (data) => {
+
+  const makeDataSet = async (data) => {
     let cols = colMaker(data);
+
+    cols[0].render = (text, record) => {
+      const path = `/form/${record.formId}`;
+      return <Link to={path}>{text}</Link>;
+    };
     cols = appendButton(cols, processtype);
     setTbcolumn(cols);
     const filtered = filterProcessType(processtype, data);
     setTbdata(rowMaker(filtered));
     dispatch(globalVariable({ onGoing: data }));
     const cnt = countProcessType(data, userId);
-    console.log(cnt);
+
     globalVariable({
       processTypeCount: cnt,
     });
@@ -165,7 +173,13 @@ const Ongoing = (props) => {
     else makeDataSet(onGoing);
   }, [processtype]);
 
-  const TableDesc = () => {
+  const PageHeader = () => {
+    const findUserName = () => {
+      const user = _.find(userList, (o) => {
+        return o.id === userId;
+      });
+      if (user) return user.name;
+    };
     const name = findUserName();
     const usr = `[${name ? name : "N/A"}]`;
     const Msg = () => {
@@ -190,12 +204,6 @@ const Ongoing = (props) => {
     );
   };
 
-  const findUserName = () => {
-    const user = _.find(userList, (o) => {
-      return o.id === userId;
-    });
-    if (user) return user.name;
-  };
   const inputForm = (
     <form>
       <div class=" text-start">
@@ -294,7 +302,7 @@ const Ongoing = (props) => {
         <div class="row flex-nowrap">
           <Sidebar />
           <Body>
-            <TableDesc />
+            <PageHeader />
             <Table
               dataSource={tbdata}
               columns={tbcolumn}
