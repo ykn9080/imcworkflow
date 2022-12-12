@@ -82,6 +82,7 @@ export const makeColumn = (data1, opt) => {
 };
 
 export const hideColumn = (Cols, hideArr) => {
+  if (!Cols | !hideArr) return;
   return Cols.filter((col) => {
     return hideArr.indexOf(col.dataIndex) === -1;
   });
@@ -96,6 +97,9 @@ export const convertRows = (Rows, convertArr) => {
       switch (k.type) {
         case "date":
           rtn[k.dataIndex] = moment(rtn[k.dataIndex]).format(k.format);
+          break;
+        case "boolean":
+          rtn[k.dataIndex] = k.format[rtn[k.dataIndex]];
           break;
         default:
           break;

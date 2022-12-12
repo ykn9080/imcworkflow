@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { menuList1, menuList2 } from "../../assets/json/index";
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const cnt = useSelector((state) => state.global.processTypeCount);
@@ -195,3 +195,27 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
+const menuList1 = [
+  { title: "전체", name: "전체", path: "/ongoing", badge: 0 },
+  { title: "결재", name: "대기", path: "/ongoing/결재", badge: 1 },
+  { title: "진행", name: "진행", path: "/ongoing/진행", badge: 0 },
+  { title: "반려", name: "반려", path: "/ongoing/반려", badge: 1 },
+  { title: "완료", name: "완료", path: "/ongoing/완료", badge: 1 },
+  { title: "참조", name: "참조", path: "/ongoing/참조", badge: 0 },
+];
+const menuList2 = [
+  { title: "결재문서", name: "기안", path: "/ongoing/기안", badge: 0 },
+  {
+    title: "문서양식",
+    name: "archive",
+    path: "/form/list?type=archive",
+    badge: 0,
+  },
+  {
+    title: "임시보관",
+    name: "임시",
+    path: "/form/list?type=imsi",
+    badge: 0,
+  },
+];

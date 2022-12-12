@@ -6,22 +6,36 @@ import Body from "../components/layout/Body";
 import Header from "../components/layout/Header";
 import axios from "axios";
 import _ from "lodash";
-import { useHistory, useNavigate, useParams } from "react-router-dom";
+import {
+  useHistory,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { API2 } from "constants";
 import { getData } from "../components/dataget/fetchData";
 import { message } from "antd";
 import { IoMdReturnLeft } from "react-icons/io";
 import { BsPencil } from "react-icons/bs";
 import { FaFileDownload } from "react-icons/fa";
+import { link } from "./FormList";
+
 const Form = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { formId } = useParams();
   const [formData, setFormData] = useState();
+  const [linkobj, setLinkobj] = useState();
   const userId = useSelector((state) => state.global.userId);
   const userList = useSelector((state) => state.global.userList);
-  const data = "lorem <b>ipsum</b>";
-  async function fetchData() {
-    const url2 = `${API2}/form/${formId}`;
+
+  useEffect(() => {
+    const lk = link(searchParams.get("type"), userId);
+    setLinkobj(lk);
+    fetchData(lk);
+  }, [formId]);
+  async function fetchData(lk) {
+    const url2 = `${API2}/form/${formId}?type=lk.type`;
     let rtn = await getData(url2, "get");
     // getData(`${API2}/docx1`, "get");
     if (rtn?.data) {
@@ -35,9 +49,7 @@ const Form = () => {
     link.setAttribute("download", "dummy.docx");
     link.click();
   }
-  useEffect(() => {
-    fetchData();
-  }, [formId]);
+
   const submitHandler = () => {
     // form에 수정사항 저장
     const data = {};

@@ -21,7 +21,9 @@ function App() {
         <Route path="completed" element={<Completed />} />
         <Route path="setting/:id" element={<Setting />} />
         <Route path="form/edit/:formId" element={<FormEdit />} />
+        {/* <Route path="form/archive/:formId" element={<FormEdit />} /> */}
         <Route path="form/list" element={<FormList />} />
+        {/* <Route path="form/archive" element={<FormList />} /> */}
         <Route exact path="form/:formId" element={<Form />} />
         <Route path="process/list" element={<ProcessList />} />
         <Route exact path="process/:processId" element={<Process />} />

@@ -5,7 +5,7 @@ import Sidebar from "../components/layout/Sidebar";
 import Body from "../components/layout/Body";
 import Header from "../components/layout/Header";
 import $ from "jquery";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { API2 } from "constants";
 import { getData } from "../components/dataget/fetchData";
 import { message } from "antd";
@@ -13,23 +13,29 @@ import CkEditor from "components/editor/ckEditor";
 import { BootModal } from "components/modal/BootModal";
 import ProcessEditor from "components/process/ProcessEditor";
 import { findTaskId } from "components/dataget/findId";
+import Spinner from "utilities/spinner";
 import moment from "moment";
+import { link } from "./FormList";
 
 const Form = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const { formId } = useParams();
 
   const [formData, setFormData] = useState();
   const [formid, setFormid] = useState();
-
+  const [loading, setLoading] = useState(false);
+  const [linkobj, setLinkobj] = useState();
   const [modal, setModal] = useState();
   const userId = useSelector((state) => state.global.userId);
   //const editorText = useSelector((state) => state.global.editorText);
-
+  console.log(searchParams.get("type")); // 'name'
   async function fetchForm(id) {
+    setLoading(true);
     const url2 = `${API2}/formwithtask/${id}`;
     let rtn = await getData(url2, "get");
+    setLoading(false);
     console.log(id, rtn);
     if (rtn && rtn.data && rtn.data[0]) {
       setFormData(rtn.data[0]);
@@ -62,9 +68,10 @@ const Form = () => {
     };
     setFormid(formId);
     setModal(modal);
+    const lk = link(searchParams.get("type"), userId);
+    setLinkobj(lk);
   }, [formId]);
 
-  useEffect(() => {}, []);
   const submitHandler = () => {
     // form에 수정사항 저장
     const data = {};
@@ -129,6 +136,25 @@ const Form = () => {
       getData(`${urlform}/${formid}`, "put", dataform);
     }
   };
+  const saveArchiveHandler = async () => {
+    const curdate = new Date();
+    let url = `${API2}/formarchive`;
+    let method = "post";
+    let data = {
+      formType: formData.formType,
+      title: formData.formTitle,
+      html: formData.html,
+      created: curdate,
+      writerId: userId,
+      isOpen: formData.isOpen,
+      descript: formData.descript,
+    };
+    if (formId !== "new") {
+      url = `url/${formId}`;
+      method = "put";
+    }
+    const rtnformarchive = await getData(url, method, data);
+  };
   const onFormChange = (e, label) => {
     const newform = { ...formData, [label]: e.target.value };
     console.log(newform);
@@ -136,70 +162,74 @@ const Form = () => {
   };
   const formInput = (
     <form class="text-start">
-      <div class="row mb-3">
-        <label for="title" class="col-sm-2 col-form-label">
-          기안명
-        </label>
-        <div class="col-sm-10">
-          <input
-            type="text"
-            class="form-control"
-            id="title"
-            value={formData?.taskName}
-            onChange={(e) => {
-              onFormChange(e, "taskName");
-            }}
-          />
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="descript" class="col-sm-2 col-form-label">
-          설명
-        </label>
-        <div class="col-sm-10">
-          <textarea
-            style={{ height: 100 }}
-            class="form-control"
-            id="descript"
-            value={formData?.descript}
-            onChange={(e) => {
-              onFormChange(e, "descript");
-            }}
-          />
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="duedate" class="col-sm-2 col-form-label">
-          완료일
-        </label>
-        <div class="col-sm-10">
-          <input
-            type="date"
-            class="form-control"
-            id="duedate"
-            value={formData?.dueDate}
-            onChange={(e) => {
-              onFormChange(e, "dueDate");
-            }}
-          />
-        </div>
-      </div>
-      <div class="row mb-3">
-        <label for="process" class="col-sm-2 col-form-label">
-          결재선
-        </label>
-        <div class="col-sm-10 text-start">
-          <input
-            type="button"
-            class="btn btn-dark btn-sm"
-            value="결재선 편집"
-            id="process"
-            onClick={() => {
-              $("#btnModal").click();
-            }}
-          />
-        </div>
-      </div>
+      {linkobj?.type === "imsi" && (
+        <>
+          <div class="row mb-3">
+            <label for="title" class="col-sm-2 col-form-label">
+              기안명
+            </label>
+            <div class="col-sm-10">
+              <input
+                type="text"
+                class="form-control"
+                id="title"
+                value={formData?.taskName}
+                onChange={(e) => {
+                  onFormChange(e, "taskName");
+                }}
+              />
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="descript" class="col-sm-2 col-form-label">
+              설명
+            </label>
+            <div class="col-sm-10">
+              <textarea
+                style={{ height: 100 }}
+                class="form-control"
+                id="descript"
+                value={formData?.descript}
+                onChange={(e) => {
+                  onFormChange(e, "descript");
+                }}
+              />
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="duedate" class="col-sm-2 col-form-label">
+              완료일
+            </label>
+            <div class="col-sm-10">
+              <input
+                type="date"
+                class="form-control"
+                id="duedate"
+                value={formData?.dueDate}
+                onChange={(e) => {
+                  onFormChange(e, "dueDate");
+                }}
+              />
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="process" class="col-sm-2 col-form-label">
+              결재선
+            </label>
+            <div class="col-sm-10 text-start">
+              <input
+                type="button"
+                class="btn btn-dark btn-sm"
+                value="결재선 편집"
+                id="process"
+                onClick={() => {
+                  $("#btnModal").click();
+                }}
+              />
+            </div>
+          </div>
+        </>
+      )}
       <div class="row mb-3">
         <label for="formtype" class="col-sm-2 col-form-label">
           문서유형
@@ -244,21 +274,39 @@ const Form = () => {
           <Sidebar />
           <Body>
             <Header
-              title="기안작성"
+              title={linkobj?.titleedit}
               right={
-                <button
-                  type="button"
-                  class="btn btn-primary ms-1 "
-                  onClick={submitHandler}
-                >
-                  상신
-                </button>
+                linkobj?.type === "imsi" && (
+                  <button
+                    type="button"
+                    class="btn btn-primary ms-1 "
+                    onClick={submitHandler}
+                  >
+                    상신
+                  </button>
+                )
               }
             />
+
+            {loading && <Spinner />}
             {formInput}
             <CkEditor />
 
             <div class="d-flex justify-content-center mt-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  value=""
+                  onChange={(e) => {
+                    onFormChange(e, "isOpen");
+                  }}
+                  id="flexCheckDefault"
+                />
+                <label class="form-check-label" for="flexCheckDefault">
+                  공유문서
+                </label>
+              </div>
               <button
                 type="button"
                 class="btn btn-light"
@@ -271,7 +319,7 @@ const Form = () => {
                 class="btn btn-light   ms-1 "
                 onClick={saveDocumentHandler}
               >
-                임시저장
+                {linkobj === "imsi" ? "임시저장" : "저장"}
               </button>
             </div>
           </Body>
