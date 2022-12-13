@@ -13,12 +13,13 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { API2 } from "constants";
-import { getData } from "../components/dataget/fetchData";
+import { getData, fetchFormById } from "../components/dataget/fetchData";
 import { message } from "antd";
 import { IoMdReturnLeft } from "react-icons/io";
 import { BsPencil } from "react-icons/bs";
 import { FaFileDownload } from "react-icons/fa";
 import { link } from "./FormList";
+import Spinner from "utilities/spinner";
 
 const Form = () => {
   const navigate = useNavigate();
@@ -26,23 +27,34 @@ const Form = () => {
   const { formId } = useParams();
   const [formData, setFormData] = useState();
   const [linkobj, setLinkobj] = useState();
+  const [loading, setLoading] = useState(false);
   const userId = useSelector((state) => state.global.userId);
   const userList = useSelector((state) => state.global.userList);
 
   useEffect(() => {
     const lk = link(searchParams.get("type"), userId);
     setLinkobj(lk);
-    fetchData(lk);
+    //fetchData(lk);
+    fetchForm(formId, lk);
   }, [formId]);
-  async function fetchData(lk) {
-    const url2 = `${API2}/form/${formId}?type=lk.type`;
-    let rtn = await getData(url2, "get");
-    // getData(`${API2}/docx1`, "get");
-    if (rtn?.data) {
-      console.log(formId, rtn.data, rtn.data[0]);
-      setFormData(rtn.data);
+
+  async function fetchForm(id, lk) {
+    setLoading(true);
+    const rtn = await fetchFormById(id, lk);
+    setLoading(false);
+    if (rtn) {
+      setFormData(rtn);
     }
   }
+  // async function fetchData(lk) {
+  //   const url2 = `${API2}/form/${formId}?type=lk.type`;
+  //   let rtn = await getData(url2, "get");
+  //   // getData(`${API2}/docx1`, "get");
+  //   if (rtn?.data) {
+  //     console.log(formId, rtn.data, rtn.data[0]);
+  //     setFormData(rtn.data);
+  //   }
+  // }
   function getFileToDownload() {
     const link = document.createElement("a");
     link.href = `${API2}/docx1`;
@@ -76,7 +88,7 @@ const Form = () => {
   //     navigate(`/ongoing`, { replace: true });
   //   }
   // };
-  const PageHeader = () => {
+  const PageHeader = ({ linkobj }) => {
     const findUserName = () => {
       const user = _.find(userList, (o) => {
         return o.id === userId;
@@ -85,10 +97,10 @@ const Form = () => {
     };
     const name = findUserName();
     const usr = `[${name ? name : "N/A"}]`;
-
+    console.log(linkobj);
     return (
       <Header
-        title={<>문서보기</>}
+        title={linkobj?.titleview}
         right={
           <>
             <button
@@ -102,7 +114,9 @@ const Form = () => {
               type="button"
               class="btn btn-dark me-1"
               onClick={() =>
-                navigate(`/form/edit/${formId}`, { replace: true })
+                navigate(`/form/edit/${formId}?type=${linkobj.type}`, {
+                  replace: true,
+                })
               }
             >
               <BsPencil />
@@ -133,19 +147,8 @@ const Form = () => {
         <div class="row flex-nowrap">
           <Sidebar />
           <Body>
-            {/* <div class="d-flex justify-content-between">
-              <p class="g-col-6 fw-bold">View</p>
-              <button
-                type="button"
-                class="btn btn-primary"
-                onClick={() =>
-                  navigate(`/form/edit/${formId}`, { replace: true })
-                }
-              >
-                Edit
-              </button>
-            </div> */}
-            <PageHeader />
+            {loading && <Spinner />}
+            <PageHeader linkobj={linkobj} />
             <div dangerouslySetInnerHTML={{ __html: formData?.html }} />
           </Body>
         </div>

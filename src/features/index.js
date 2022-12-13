@@ -40,5 +40,6 @@ const globalVar = {
   userId: null,
   userList: null,
   processTypeCount: null, //process type별 갯수
+  processArray: null, //process의 단계별 설정
   editorText: "",
 };

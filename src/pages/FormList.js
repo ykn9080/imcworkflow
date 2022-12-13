@@ -75,7 +75,7 @@ const FormList = () => {
     console.log(cols, data);
     if (!cols) return;
     cols[lk?.colindex].render = (text, record) => {
-      const path = `/form/${record.id}`;
+      const path = `/form/${record.id}?type=${lk?.type}`;
       return <Link to={path}>{text}</Link>;
     };
     const cellClick = (record) => {
@@ -149,7 +149,9 @@ export const link = (type, userId) => {
   //const type = location.pathname.split("/")[2];
   //const type = searchParams.get("type");
   let title,
+    titleview,
     titleedit,
+    titleeditnew,
     navlink,
     url2,
     hidecol,
@@ -166,14 +168,24 @@ export const link = (type, userId) => {
   switch (type) {
     case "imsi":
       title = "임시문서 리스트";
+      titleview = "임시문서보기";
       titleedit = "임시문서수정";
+      titleeditnew = "임시문서작성";
       navlink = `/form/imsi/new`;
       url2 = `${API2}/formImsiByUser/${userId}`;
       hidecol = ["id", "html", "taskId"];
       break;
+    case "ongoing":
+      title = "결재문서보기";
+      titleview = "결재문서보기";
+      titleedit = "결재문서수정";
+      titleeditnew = "결재문서작성";
+      break;
     case "archive":
       title = "문서 Archive";
-      titleedit = "문서수정";
+      titleview = "문서양식보기";
+      titleedit = "문서양식수정";
+      titleeditnew = "문서양식작성";
       navlink = "/form/archive/new";
       url2 = `${API2}/formArchiveByUser/${userId}`;
       hidecol = ["id", "html", "writerId"];
@@ -203,7 +215,9 @@ export const link = (type, userId) => {
   return {
     type,
     title,
+    titleview,
     titleedit,
+    titleeditnew,
     navlink,
     url2,
     hidecol,

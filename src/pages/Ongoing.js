@@ -153,7 +153,7 @@ const Ongoing = (props) => {
     let cols = colMaker(data);
 
     cols[0].render = (text, record) => {
-      const path = `/form/${record.formId}`;
+      const path = `/form/${record.formId}?type=ongoing`;
       return <Link to={path}>{text}</Link>;
     };
     cols = appendButton(cols, processtype);

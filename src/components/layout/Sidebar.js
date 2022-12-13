@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import globalVariable from "actions";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const cnt = useSelector((state) => state.global.processTypeCount);
 
   const ListItem = ({ count, item }) => {
@@ -52,7 +54,10 @@ const Sidebar = () => {
                 <button
                   type="button"
                   class="btn btn-light w-auto"
-                  onClick={() => navigate(`/form/edit/new`, { replace: true })}
+                  onClick={() => {
+                    dispatch(globalVariable({ processArray: null }));
+                    navigate(`/form/edit/new?type=ongoing`, { replace: true });
+                  }}
                 >
                   기안 작성
                 </button>

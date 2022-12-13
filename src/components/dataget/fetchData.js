@@ -248,3 +248,15 @@ export const countProcessType = (data, userId) => {
     //dispatch(globalVariable({ processTypeCount: obj }));
   }
 };
+
+export async function fetchFormById(id, lk) {
+  let url2 = `${API2}/formwithtask/${id}`;
+  if (lk.type === "archive") url2 = `${API2}/formarchive/${id}`;
+  let rtn = await getData(url2, "get");
+
+  if (rtn && rtn.data) {
+    let rtndt = rtn.data;
+    if (lk.type !== "archive") rtndt = rtn.data[0];
+    return rtndt;
+  }
+}

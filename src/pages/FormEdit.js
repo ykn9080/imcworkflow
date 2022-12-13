@@ -5,10 +5,11 @@ import Sidebar from "../components/layout/Sidebar";
 import Body from "../components/layout/Body";
 import Header from "../components/layout/Header";
 import $ from "jquery";
+import _ from "lodash";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { API2 } from "constants";
-import { getData } from "../components/dataget/fetchData";
-import { message } from "antd";
+import { getData, fetchFormById } from "../components/dataget/fetchData";
+import { message, Tooltip, Popconfirm, Button } from "antd";
 import CkEditor from "components/editor/ckEditor";
 import { BootModal } from "components/modal/BootModal";
 import ProcessEditor from "components/process/ProcessEditor";
@@ -16,6 +17,7 @@ import { findTaskId } from "components/dataget/findId";
 import Spinner from "utilities/spinner";
 import moment from "moment";
 import { link } from "./FormList";
+import { DrawProcess } from "components/process/ProcessEditor";
 
 const Form = () => {
   const navigate = useNavigate();
@@ -28,24 +30,28 @@ const Form = () => {
   const [loading, setLoading] = useState(false);
   const [linkobj, setLinkobj] = useState();
   const [modal, setModal] = useState();
+  const [drawDiagram, setDrawDiagram] = useState();
   const userId = useSelector((state) => state.global.userId);
-  //const editorText = useSelector((state) => state.global.editorText);
+  const processArray = useSelector((state) => state.global.processArray);
+  const editorText = useSelector((state) => state.global.editorText);
   console.log(searchParams.get("type")); // 'name'
-  async function fetchForm(id) {
+
+  async function fetchForm(id, lk) {
     setLoading(true);
-    const url2 = `${API2}/formwithtask/${id}`;
-    let rtn = await getData(url2, "get");
+    const rtn = await fetchFormById(id, lk);
     setLoading(false);
-    console.log(id, rtn);
-    if (rtn && rtn.data && rtn.data[0]) {
-      setFormData(rtn.data[0]);
-      dispatch(globalVariable({ editorText: rtn.data[0].html }));
+    if (rtn) {
+      setFormData(rtn);
+      dispatch(globalVariable({ editorText: rtn.html }));
     }
   }
   useEffect(() => {
+    const lk = link(searchParams.get("type"), userId);
+    setLinkobj(lk);
     if (formId !== "new") {
       console.log(formId.toString());
-      fetchForm(formId);
+
+      fetchForm(formId, lk);
     } else {
       setFormData({
         taskName: "",
@@ -68,40 +74,45 @@ const Form = () => {
     };
     setFormid(formId);
     setModal(modal);
-    const lk = link(searchParams.get("type"), userId);
-    setLinkobj(lk);
   }, [formId]);
+  useEffect(() => {
+    const rtn = DrawProcess(processArray);
+    console.log(rtn);
+    setDrawDiagram(rtn);
+  }, [processArray]);
 
-  const submitHandler = () => {
-    // form에 수정사항 저장
-    const data = {};
-    //getData(`${API2}/form`, "post", data);
-    // activity에 신규추가
-    applyAction();
-    // 전체리스트로 가기
-    navigate(`/ongoing`, { replace: true });
+  const submitHandler = async () => {
+    const taskId = await saveWorkflowHandler();
+    if (taskId) {
+      // activity에 신규추가
+      const rtn = initAction(taskId);
+      // 전체리스트로 가기
+      if (rtn) {
+        console.log(rtn);
+        message.info("상신되었습니다. ");
+        navigate(`/ongoing`, { replace: true });
+      } else {
+        message.info("상신에 실패했습니다. ");
+      }
+    } else message.info("task등록에 실패했습니다. ");
   };
   const saveProcessHandler = () => {
     console.log("saveProcess");
   };
-  const applyAction = async () => {
-    const taskId = await findTaskId(formid, "form");
+  const initAction = async (taskId) => {
     const url = `${API2}/activityStart/${taskId}`;
 
-    const rtn = getData(url, "get");
-    if (rtn) {
-      console.log(rtn);
-      message.info("상신되었습니다. ");
-      navigate(`/ongoing`, { replace: true });
-    }
+    const rtn = await getData(url, "get");
+    return rtn;
   };
-  const saveDocumentHandler = async () => {
-    const taskId = await findTaskId(formid, "form");
+  const saveWorkflowHandler = async () => {
+    let taskId = await findTaskId(formid, "form");
     console.log(formData);
     const curdate = new Date();
     // find taskId from processId;
     // processId===-1이면 신규, 아니면 수정
     const urltsk = `${API2}/task`;
+    const urlprocess = `${API2}/process`;
     const urlform = `${API2}/form`;
     let datatsk = {
       name: formData.taskName,
@@ -111,7 +122,7 @@ const Form = () => {
     let dataform = {
       formType: formData.formType,
       title: formData.formTitle,
-      html: formData.html,
+      html: editorText,
     };
 
     if (!taskId) {
@@ -122,19 +133,27 @@ const Form = () => {
 
       const rtntsk = await getData(urltsk, "post", datatsk);
       console.log(rtntsk);
+      taskId = rtntsk.id;
       //poset new form
-      dataform.taskId = rtntsk.id;
+      dataform.taskId = taskId;
       dataform.created = curdate;
       const rtnform = await getData(urlform, "post", dataform);
+      //post new process
+      let newprocess = _.cloneDeep(processArray);
+      newprocess.map((i, item) => {
+        item.taskId = taskId;
+        newprocess.splice(i, 1, item);
+      });
+      await getData(urlprocess, "post", newprocess);
     } else {
       console.log("else");
       // processId가 있으면 수정
-      const taskId = await findTaskId(formid, "form");
       console.log(formid, taskId, urltsk);
       getData(`${urltsk}/${taskId}`, "put", datatsk);
       //formId가 있으면 수정
       getData(`${urlform}/${formid}`, "put", dataform);
     }
+    return taskId;
   };
   const saveArchiveHandler = async () => {
     const curdate = new Date();
@@ -150,13 +169,17 @@ const Form = () => {
       descript: formData.descript,
     };
     if (formId !== "new") {
-      url = `url/${formId}`;
+      url = `${url}/${formId}`;
       method = "put";
     }
+    console.log(url, method, formId);
     const rtnformarchive = await getData(url, method, data);
   };
   const onFormChange = (e, label) => {
-    const newform = { ...formData, [label]: e.target.value };
+    let newform = { ...formData, [label]: e.target.value };
+    if (label === "taskName" && formId === "new") {
+      newform.formTitle = e.target.value;
+    }
     console.log(newform);
     setFormData(newform);
   };
@@ -216,16 +239,17 @@ const Form = () => {
             <label for="process" class="col-sm-2 col-form-label">
               결재선
             </label>
-            <div class="col-sm-10 text-start">
+            <div class="col-sm-10 text-start d-flex justify-content-start">
               <input
                 type="button"
-                class="btn btn-dark btn-sm"
+                class="btn btn-dark btn-sm me-5"
                 value="결재선 편집"
                 id="process"
                 onClick={() => {
                   $("#btnModal").click();
                 }}
-              />
+              />{" "}
+              {drawDiagram}
             </div>
           </div>
         </>
@@ -274,16 +298,24 @@ const Form = () => {
           <Sidebar />
           <Body>
             <Header
-              title={linkobj?.titleedit}
+              title={
+                formId === "new" ? linkobj?.titleeditnew : linkobj?.titleedit
+              }
               right={
-                linkobj?.type === "imsi" && (
-                  <button
-                    type="button"
-                    class="btn btn-primary ms-1 "
-                    onClick={submitHandler}
+                ["imsi", "ongoing"].indexOf(linkobj?.type) > -1 && (
+                  <Popconfirm
+                    title="결재를 상신하시겠습니까?"
+                    placement="topLeft"
+                    okText="네"
+                    cancelText="아니오"
+                    onConfirm={submitHandler}
                   >
-                    상신
-                  </button>
+                    <Button
+                      style={{ backgroundColor: "black", color: "white" }}
+                    >
+                      상신
+                    </Button>
+                  </Popconfirm>
                 )
               }
             />
@@ -293,31 +325,45 @@ const Form = () => {
             <CkEditor />
 
             <div class="d-flex justify-content-center mt-3">
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  value=""
-                  onChange={(e) => {
-                    onFormChange(e, "isOpen");
-                  }}
-                  id="flexCheckDefault"
-                />
-                <label class="form-check-label" for="flexCheckDefault">
-                  공유문서
-                </label>
-              </div>
+              <Tooltip
+                placement="top"
+                title="회사 공용 문서로 저장"
+                className="mt-2"
+              >
+                <div class="form-check">
+                  <input
+                    class="form-check-input me-1"
+                    type="checkbox"
+                    checked={formData?.isOpen}
+                    onChange={(e) => {
+                      setFormData({ ...formData, isOpen: e.target.checked });
+                    }}
+                    id="flexCheckDefault"
+                  />
+                  <label class="form-check-label  me-3" for="flexCheckDefault">
+                    공유
+                  </label>
+                </div>
+              </Tooltip>
               <button
                 type="button"
                 class="btn btn-light"
-                onClick={() => navigate(`/form/${formid}`, { replace: true })}
+                onClick={() =>
+                  navigate(`/form/${formid}?type=${linkobj.type}`, {
+                    replace: true,
+                  })
+                }
               >
                 미리보기
               </button>
               <button
                 type="button"
                 class="btn btn-light   ms-1 "
-                onClick={saveDocumentHandler}
+                onClick={
+                  linkobj?.type === "archive"
+                    ? saveArchiveHandler
+                    : saveWorkflowHandler
+                }
               >
                 {linkobj === "imsi" ? "임시저장" : "저장"}
               </button>
