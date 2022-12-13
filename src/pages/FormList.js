@@ -23,6 +23,7 @@ import {
 import { Table, message } from "antd";
 import { TfiSharethis } from "react-icons/tfi";
 import { BsFillPersonFill } from "react-icons/bs";
+import Spinner from "utilities/spinner";
 
 const FormList = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const FormList = () => {
   const [tbdata, setTbdata] = useState([]);
   const [tbcolumn, setTbcolumn] = useState(false);
   const [linkobj, setLinkobj] = useState();
+  const [loading, setLoading] = useState(false);
   const userId = useSelector((state) => state.global.userId);
   const imsiForm = useSelector((state) => state.global.imsiForm);
   const userList = useSelector((state) => state.global.userList);
@@ -53,27 +55,31 @@ const FormList = () => {
   }, [searchParams.get("type")]);
 
   const fetchData = async (lk) => {
+    setLoading(true);
+    console.log(lk.url2);
     let rtn = await getData(lk.url2, "get");
+    setLoading(false);
     console.log(rtn, userId);
-    makeDataSet(rtn.data);
+    makeDataSet(rtn.data, lk);
   };
-  const colMaker = (data) => {
+  const colMaker = (data, lk) => {
     let mcol = makeColumn(data, {
-      fields: linkobj?.fields,
+      fields: lk?.fields,
     });
-    mcol = hideColumn(mcol, linkobj?.hidecol);
+    mcol = hideColumn(mcol, lk?.hidecol);
     return mcol;
   };
 
-  const makeDataSet = (data) => {
-    let cols = colMaker(data);
-    console.log(cols);
-    cols[linkobj?.colindex].render = (text, record) => {
+  const makeDataSet = (data, lk) => {
+    let cols = colMaker(data, lk);
+    console.log(cols, data);
+    if (!cols) return;
+    cols[lk?.colindex].render = (text, record) => {
       const path = `/form/${record.id}`;
       return <Link to={path}>{text}</Link>;
     };
     const cellClick = (record) => {
-      navigate(`/form/edit/${record.id}?type=${linkobj?.type}`);
+      navigate(`/form/edit/${record.id}?type=${lk?.type}`);
       //navigate(linkobj?.cellclick);
     };
     const btnarr = [
@@ -86,7 +92,7 @@ const FormList = () => {
     cols = appendButton(cols, btnarr);
 
     setTbcolumn(cols);
-    data = convertRows(data, linkobj?.rows);
+    data = convertRows(data, lk?.rows);
     setTbdata(data);
     dispatch(globalVariable({ imsiForm: data }));
   };
@@ -123,6 +129,8 @@ const FormList = () => {
           <Sidebar />
           <Body>
             <PageHeader />
+
+            {loading && <Spinner />}
             <Table
               dataSource={tbdata}
               columns={tbcolumn}

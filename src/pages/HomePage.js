@@ -12,7 +12,7 @@ import {
 } from "../components/dataget/fetchData";
 import { API2 } from "constants";
 import { Table, Space, Button } from "antd";
-
+import Spinner from "utilities/spinner";
 import _ from "lodash";
 import { TfiCheck } from "react-icons/tfi";
 
@@ -21,6 +21,7 @@ export const HomePage = () => {
   const [tbdata, setTbdata] = useState([]);
   const [tbcolumn, setTbcolumn] = useState(false);
   const [selected, setSelected] = useState();
+  const [loading, setLoading] = useState(false);
   const userId = useSelector((state) => state.global.userId);
   const userList = useSelector((state) => state.global.userList);
 
@@ -72,7 +73,9 @@ export const HomePage = () => {
       replacements: { id: 3 },
     };
     const url = `${API2}/getquery`;
+    setLoading(true);
     let rtn = await getData(url, "POST", params);
+    setLoading(false);
     console.log(rtn);
     makeDataSet(rtn);
 
@@ -141,6 +144,7 @@ export const HomePage = () => {
               rowClassName={(record) => (record.id === selected ? "ddd" : "")}
             />
           </Body>
+          {loading && <Spinner />}
         </div>
       </div>
     </div>

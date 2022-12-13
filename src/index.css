@@ -32,3 +32,8 @@ code {
 .ck-editor__editable_inline {
   min-height: 300px;
 }
+.spinner{
+  position:absolute;
+  top: 50px;
+  left: 55%;
+}

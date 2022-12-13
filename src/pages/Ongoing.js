@@ -18,6 +18,7 @@ import {
 import { API2 } from "constants";
 import { Table, message } from "antd";
 import { findFormByTaskId } from "components/dataget/findId";
+import Spinner from "utilities/spinner";
 
 const Ongoing = (props) => {
   let navigate = useNavigate();
@@ -29,6 +30,7 @@ const Ongoing = (props) => {
   const [action, setAction] = useState();
   const [msg, setMsg] = useState();
   const [currentProcess, setCurrentProcess] = useState();
+  const [loading, setLoading] = useState(false);
 
   const userId = useSelector((state) => state.global.userId);
   const onGoing = useSelector((state) => state.global.onGoing);
@@ -141,7 +143,9 @@ const Ongoing = (props) => {
   };
   async function fetchData() {
     const url2 = `${API2}/onGoinglistbyuser/${userId}`;
+    setLoading(true);
     let rtn = await getData(url2, "get");
+    setLoading(false);
     makeDataSet(rtn.data);
   }
 
@@ -303,6 +307,7 @@ const Ongoing = (props) => {
           <Sidebar />
           <Body>
             <PageHeader />
+            {loading && <Spinner />}
             <Table
               dataSource={tbdata}
               columns={tbcolumn}

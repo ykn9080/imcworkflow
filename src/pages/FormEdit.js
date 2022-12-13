@@ -162,7 +162,7 @@ const Form = () => {
   };
   const formInput = (
     <form class="text-start">
-      {linkobj?.type === "imsi" && (
+      {linkobj?.type !== "archive" && (
         <>
           <div class="row mb-3">
             <label for="title" class="col-sm-2 col-form-label">
