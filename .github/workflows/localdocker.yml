@@ -36,7 +36,7 @@ jobs:
           port: 7070
           pass: ykn9080
           run: |
-            echo docker creaet port:8087 name:imcworkflow 로 작업합니다...
+            echo docker creaet port:8083 name:imcworkflow 로 작업합니다...
             echo
             echo 1/5 docker login 
             echo ...이미설정되있는걸로 알고 pass
@@ -47,9 +47,9 @@ jobs:
             echo 3/5 이전 버젼 삭제후 docker run
             docker rm -f imcworkflow
             wait
-            docker run --name imcworkflow -p 8087:80 --network=kong-net -d yknam/imcworkflow
+            docker run --name imcworkflow -p 8083:80 --network=kong-net -d yknam/imcworkflow
             wait
             echo 4/5 docker image prune
             docker image prune -f
             wait
-            echo 5/5 finished.  see at http://imcmaster.iptime.org:8087
+            echo 5/5 finished.  see at http://imcmaster.iptime.org:8083
