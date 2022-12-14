@@ -12,14 +12,19 @@ import { getData, fetchFormById } from "../components/dataget/fetchData";
 import { message, Tooltip, Popconfirm, Button } from "antd";
 import CkEditor from "components/editor/ckEditor";
 import { BootModal } from "components/modal/BootModal";
-import ProcessEditor from "components/process/ProcessEditor";
+import ProcessEditor from "components/contents/ProcessEditor";
 import { findTaskId } from "components/dataget/findId";
 import Spinner from "utilities/spinner";
 import moment from "moment";
 import { link } from "./FormList";
-import { DrawProcess } from "components/process/ProcessEditor";
+import { DrawProcess } from "components/contents/ProcessEditor";
+import FormContent from "components/contents/FormContent";
+import FormListComponent from "components/contents/FormListComponent";
+import { RxMagnifyingGlass } from "react-icons/rx";
+import { MdOutlineKeyboardReturn } from "react-icons/md";
+import axios from "axios";
 
-const Form = () => {
+const FormEdit = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
@@ -41,6 +46,7 @@ const Form = () => {
     const rtn = await fetchFormById(id, lk);
     setLoading(false);
     if (rtn) {
+      console.log(rtn);
       setFormData(rtn);
       dispatch(globalVariable({ editorText: rtn.html }));
     }
@@ -65,22 +71,20 @@ const Form = () => {
       console.log("nodata");
     }
 
-    const modal = {
-      id: "processBuilder",
-      title: "결재선 선택",
-      child: <ProcessEditor />,
-      evt: saveProcessHandler,
-      opt: { dialogClass: "modal-dialog modal-fullscreen" },
-    };
     setFormid(formId);
-    setModal(modal);
   }, [formId]);
   useEffect(() => {
     const rtn = DrawProcess(processArray);
     console.log(rtn);
     setDrawDiagram(rtn);
   }, [processArray]);
-
+  const showModal = (modal) => {
+    setModal(modal);
+    //$("#btnModal").click();
+    setTimeout(() => {
+      $("#btnModal").click();
+    }, 0);
+  };
   const submitHandler = async () => {
     const taskId = await saveWorkflowHandler();
     if (taskId) {
@@ -159,21 +163,45 @@ const Form = () => {
     const curdate = new Date();
     let url = `${API2}/formarchive`;
     let method = "post";
+    console.log(formData);
     let data = {
       formType: formData.formType,
       title: formData.formTitle,
       html: formData.html,
       created: curdate,
+      descript: formData.formDescript,
       writerId: userId,
       isOpen: formData.isOpen,
-      descript: formData.descript,
     };
     if (formId !== "new") {
       url = `${url}/${formId}`;
       method = "put";
     }
-    console.log(url, method, formId);
-    const rtnformarchive = await getData(url, method, data);
+    console.log(url, method, data, formId);
+    //const rtnput = await getData(url, method, data);
+    if (method === "put") {
+      axios
+        .put(url, data)
+        .then((res) => {
+          message.info("저장되었습니다. ");
+          //navigate(`/form/list`, { replace: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          message.warning("저장에 실패했습니다.");
+        });
+    } else {
+      axios
+        .post(url, data)
+        .then((res) => {
+          message.info("저장되었습니다. ");
+          //navigate(`/form/list`, { replace: true });
+        })
+        .catch((err) => {
+          console.log(err);
+          message.warning("저장에 실패했습니다.");
+        });
+    }
   };
   const onFormChange = (e, label) => {
     let newform = { ...formData, [label]: e.target.value };
@@ -242,14 +270,41 @@ const Form = () => {
             <div class="col-sm-10 text-start d-flex justify-content-start">
               <input
                 type="button"
-                class="btn btn-dark btn-sm me-5"
+                class="btn btn-dark btn-xs me-5"
                 value="결재선 편집"
                 id="process"
                 onClick={() => {
-                  $("#btnModal").click();
+                  const modal = {
+                    id: "processBuilder",
+                    title: "결재선 선택",
+                    child: <ProcessEditor />,
+                    evt: saveProcessHandler,
+                    opt: { dialogClass: "modal-dialog modal-fullscreen" },
+                  };
+                  showModal(modal);
                 }}
-              />{" "}
+              />
               {drawDiagram}
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-12 d-flex justify-content-end">
+              <input
+                type="button"
+                class="btn btn-dark btn-xs"
+                value="문서양식리스트"
+                id="process"
+                onClick={() => {
+                  const modal = {
+                    id: "formArchive",
+                    title: "양식 선택",
+                    child: <FormListComponent lk={linkobj} />,
+                    //evt: saveProcessHandler,
+                    opt: { dialogClass: "modal-dialog modal-xl" },
+                  };
+                  showModal(modal);
+                }}
+              />
             </div>
           </div>
         </>
@@ -281,11 +336,29 @@ const Form = () => {
             id="formtitle"
             value={formData?.formTitle}
             onChange={(e) => {
-              onFormChange(e, "formTitle");
+              onFormChange(e, "formtitle");
             }}
           />
         </div>
       </div>
+      {linkobj?.type === "archive" && (
+        <div class="row mb-3">
+          <label for="formdescript" class="col-sm-2 col-form-label">
+            문서설명
+          </label>
+          <div class="col-sm-10">
+            <textarea
+              style={{ height: 100 }}
+              class="form-control"
+              id="formdescript"
+              value={formData?.formDescript}
+              onChange={(e) => {
+                onFormChange(e, "formDescript");
+              }}
+            />
+          </div>
+        </div>
+      )}
       <div class="row mb-3">
         <label class="col-sm-2 col-form-label">본문</label>
       </div>
@@ -302,21 +375,29 @@ const Form = () => {
                 formId === "new" ? linkobj?.titleeditnew : linkobj?.titleedit
               }
               right={
-                ["imsi", "ongoing"].indexOf(linkobj?.type) > -1 && (
-                  <Popconfirm
-                    title="결재를 상신하시겠습니까?"
-                    placement="topLeft"
-                    okText="네"
-                    cancelText="아니오"
-                    onConfirm={submitHandler}
+                <>
+                  <button
+                    class="btn btn-dark btn-sm"
+                    onClick={() => navigate(-1)}
                   >
-                    <Button
-                      style={{ backgroundColor: "black", color: "white" }}
+                    <MdOutlineKeyboardReturn />
+                  </button>
+                  {[("imsi", "ongoing")].indexOf(linkobj?.type) > -1 && (
+                    <Popconfirm
+                      title="결재를 상신하시겠습니까?"
+                      placement="topLeft"
+                      okText="네"
+                      cancelText="아니오"
+                      onConfirm={submitHandler}
                     >
-                      상신
-                    </Button>
-                  </Popconfirm>
-                )
+                      <Button
+                        style={{ backgroundColor: "black", color: "white" }}
+                      >
+                        상신
+                      </Button>
+                    </Popconfirm>
+                  )}
+                </>
               }
             />
 
@@ -347,18 +428,29 @@ const Form = () => {
               </Tooltip>
               <button
                 type="button"
-                class="btn btn-light"
-                onClick={() =>
-                  navigate(`/form/${formid}?type=${linkobj.type}`, {
-                    replace: true,
-                  })
-                }
+                class="btn btn-outline-dark"
+                onClick={() => {
+                  const newFormData = { ...formData, html: editorText };
+                  const modal = {
+                    id: "preview",
+                    title: "미리보기",
+                    child: <FormContent lk={linkobj} formdt={newFormData} />,
+                    //  evt: saveProcessHandler,
+                    opt: { dialogClass: "modal-dialog modal-xl" },
+                  };
+                  showModal(modal);
+                }}
+                // () =>
+                //   navigate(`/form/${formid}?type=${linkobj.type}`, {
+                //     replace: true,
+                //   })
+                // }
               >
-                미리보기
+                <RxMagnifyingGlass /> 미리보기
               </button>
               <button
                 type="button"
-                class="btn btn-light   ms-1 "
+                class="btn btn-outline-dark ms-1"
                 onClick={
                   linkobj?.type === "archive"
                     ? saveArchiveHandler
@@ -391,4 +483,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default FormEdit;

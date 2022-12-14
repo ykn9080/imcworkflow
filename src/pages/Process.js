@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import ProcessEditor from "components/process/ProcessEditor";
+import ProcessEditor from "components/contents/ProcessEditor";
 import Sidebar from "components/layout/Sidebar";
 import Body from "components/layout/Body";
 import Header from "components/layout/Header";

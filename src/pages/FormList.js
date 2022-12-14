@@ -24,6 +24,7 @@ import { Table, message } from "antd";
 import { TfiSharethis } from "react-icons/tfi";
 import { BsFillPersonFill } from "react-icons/bs";
 import Spinner from "utilities/spinner";
+import FormListComponent from "components/contents/FormListComponent";
 
 const FormList = () => {
   const navigate = useNavigate();
@@ -129,13 +130,13 @@ const FormList = () => {
           <Sidebar />
           <Body>
             <PageHeader />
-
-            {loading && <Spinner />}
+            <FormListComponent lk={linkobj} />
+            {/* {loading && <Spinner />}
             <Table
               dataSource={tbdata}
               columns={tbcolumn}
               //   rowClassName={(record) => (record.id === selected ? "ddd" : "")}
-            />
+            /> */}
           </Body>
         </div>
       </div>
@@ -171,7 +172,7 @@ export const link = (type, userId) => {
       titleview = "임시문서보기";
       titleedit = "임시문서수정";
       titleeditnew = "임시문서작성";
-      navlink = `/form/imsi/new`;
+      navlink = `/form/imsi/new?type=imsi`;
       url2 = `${API2}/formImsiByUser/${userId}`;
       hidecol = ["id", "html", "taskId"];
       break;
@@ -182,11 +183,11 @@ export const link = (type, userId) => {
       titleeditnew = "결재문서작성";
       break;
     case "archive":
-      title = "문서 Archive";
+      title = "서식 리스트";
       titleview = "문서양식보기";
       titleedit = "문서양식수정";
       titleeditnew = "문서양식작성";
-      navlink = "/form/archive/new";
+      navlink = "/form/edit/new?type=archive";
       url2 = `${API2}/formArchiveByUser/${userId}`;
       hidecol = ["id", "html", "writerId"];
       colindex = 1;

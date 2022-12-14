@@ -20,6 +20,7 @@ import { BsPencil } from "react-icons/bs";
 import { FaFileDownload } from "react-icons/fa";
 import { link } from "./FormList";
 import Spinner from "utilities/spinner";
+import FormContent from "components/contents/FormContent";
 
 const Form = () => {
   const navigate = useNavigate();
@@ -46,15 +47,7 @@ const Form = () => {
       setFormData(rtn);
     }
   }
-  // async function fetchData(lk) {
-  //   const url2 = `${API2}/form/${formId}?type=lk.type`;
-  //   let rtn = await getData(url2, "get");
-  //   // getData(`${API2}/docx1`, "get");
-  //   if (rtn?.data) {
-  //     console.log(formId, rtn.data, rtn.data[0]);
-  //     setFormData(rtn.data);
-  //   }
-  // }
+
   function getFileToDownload() {
     const link = document.createElement("a");
     link.href = `${API2}/docx1`;
@@ -71,23 +64,7 @@ const Form = () => {
     // 전체리스트로 가기
     navigate(`/ongoing`, { replace: true });
   };
-  // const applyAction = () => {
-  //   console.log(processId, "재기안", "");
-  //   const url = `${API2}/activityInsert`;
-  //   const data = {
-  //     processId: processId,
-  //     comment: "",
-  //     action: "재기안",
-  //     userId: userId,
-  //   };
-  //   const rtn = getData(url, "post", data);
-  //   if (rtn) {
-  //     console.log(rtn);
-  //     message.info("상신되었습니다. ");
-  //     dispatchEvent(globalVariable({ onGoing: null }));
-  //     navigate(`/ongoing`, { replace: true });
-  //   }
-  // };
+
   const PageHeader = ({ linkobj }) => {
     const findUserName = () => {
       const user = _.find(userList, (o) => {
@@ -149,7 +126,7 @@ const Form = () => {
           <Body>
             {loading && <Spinner />}
             <PageHeader linkobj={linkobj} />
-            <div dangerouslySetInnerHTML={{ __html: formData?.html }} />
+            <FormContent lk={linkobj} formdt={formData} />
           </Body>
         </div>
       </div>

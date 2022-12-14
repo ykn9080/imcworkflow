@@ -20,13 +20,13 @@ export const BootModal = ({ id, title, children, clickHandler, opt }) => {
     >
       <div class={dialogClass}>
         <div class="modal-content">
-          <div class="modal-header text-bg-primary">
-            <p class="fs-6 text-light" id="formgetLabel">
+          <div class="modal-header bg-dark text-white pb-1">
+            <p class="fs-5 text-light" id="formgetLabel">
               {title}
             </p>
             <button
               type="button"
-              class="btn-close btn-close-white"
+              class="btn-close btn-close-white mb-2 me-1"
               data-bs-dismiss="modal"
               aria-label="Close"
             ></button>
@@ -65,18 +65,20 @@ const FormDefaultFooter = ({ clickHandler }) => {
         class="btn btn-secondary"
         data-bs-dismiss="modal"
       >
-        취소
+        닫기
       </ModalButton>
-      <ModalButton
-        type="button"
-        class="btn btn-primary"
-        data-bs-dismiss="modal"
-        onClick={clickHandler}
-        backcolor="#19289A"
-        color="#ffffff"
-      >
-        적용
-      </ModalButton>
+      {clickHandler && (
+        <ModalButton
+          type="button"
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          onClick={clickHandler}
+          backcolor="#19289A"
+          color="#ffffff"
+        >
+          적용
+        </ModalButton>
+      )}
     </ButtonBox>
   );
 };

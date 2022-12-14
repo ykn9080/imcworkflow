@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, message } from "antd";
+import { Table, Button, message, Popconfirm } from "antd";
 import axios from "axios";
 import { API2 } from "constants";
 import moment from "moment";
@@ -153,7 +153,65 @@ export const makeButton = (array) => {
     };
   });
 };
+const makeButtonRow = (array) => {
+  console.log(array);
+  let tit = "",
+    btntitle = "",
+    btntype = "",
+    btnwidth = "100px",
+    btnconfirm = false;
+  if (array[0].opt) {
+    const k = array[0];
+    tit = k.opt.title ? k.opt.title : tit;
+    btntitle = k.opt.btntitle ? k.opt.btntitle : btntitle;
+    btntype = k.opt.btnstyle ? k.opt.btnstyle : btntype;
+    btnwidth = k.opt.btnwidth ? k.opt.btnwidth : btnwidth;
+    btnconfirm = k.opt.confirm === true ? k.opt.confirm : btnconfirm;
+  }
+  console.log(btnconfirm);
+  return {
+    title: tit,
+    dataIndex: "",
+    width: btnwidth,
+    key: "action",
+    render: (text, record) => {
+      return (
+        <>
+          {array.map((k, i) => {
+            const popbtn = (
+              <Popconfirm
+                title="결재를 상신하시겠습니까?"
+                placement="topLeft"
+                okText="네"
+                cancelText="아니오"
+                onConfirm={() => console.log("sss")}
+              >
+                <Button style={{ backgroundColor: "black", color: "white" }}>
+                  상신
+                </Button>
+              </Popconfirm>
+            );
+            const btn = (
+              <Button
+                type={btntype}
+                icon={k.opt?.icon}
+                onClick={() => {
+                  k.click(record);
+                }}
+              >
+                {btntitle}
+              </Button>
+            );
+            let btnselect = popbtn;
+            //if (btnconfirm) btnselect = popbtn;
 
+            return btnselect;
+          })}
+        </>
+      );
+    },
+  };
+};
 export const makeCheckbox = (array) => {
   return array.map((k, i) => {
     let tit = "",
@@ -190,7 +248,7 @@ export const makeCheckbox = (array) => {
  * @returns
  */
 export const appendButton = (cols, array, type) => {
-  let btncolumns = makeButton(array);
+  let btncolumns = makeButtonRow(array);
   if (type === "checkbox") btncolumns = makeCheckbox(array);
   if (btncolumns) cols = cols.concat(btncolumns);
   return cols;
@@ -257,6 +315,10 @@ export async function fetchFormById(id, lk) {
   if (rtn && rtn.data) {
     let rtndt = rtn.data;
     if (lk.type !== "archive") rtndt = rtn.data[0];
+    else {
+      rtndt.formTitle = rtndt.title;
+      delete rtndt.title;
+    }
     return rtndt;
   }
 }
